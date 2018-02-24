@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="{% static 'css/base.css' %}"> -->
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-datetimepicker.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <title>Tracking Progress</title>
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Tracking Progress</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse" aria-expanded="true">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="">Login</a></li>
+                <li><a href="">Register</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container  theme-showcase" role="main">
+    <div class="row jumbotron">
+        <form>
+            <div class="col-md-6 ">
+                <div class="form-group">
+                    <label for="task">Task Name</label>
+                    <input type="text" name="task" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="fall_date">Deadline for Fall Student</label>
+                    <div class="input-group date form_date" data-date="" data-date-format="dd MM yyyy"
+                         data-link-field="fall_date" data-link-format="yyyy-mm-dd">
+                        <input class="form-control" size="16" type="text" value="" readonly>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                    </div>
+                    <input type="hidden" id="fall_date" value=""/><br/>
+                </div>
+                <button class="btn btn-lg btn-primary" type="button" onclick="">Upload</button>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="task">Percentage</label>
+                    <input type="text" name="percentage" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="winter_date">Deadline for Winter Student</label>
+                    <div class="input-group date form_date" data-date="" data-date-format="dd MM yyyy"
+                         data-link-field="winter_date" data-link-format="yyyy-mm-dd">
+                        <input class="form-control" size="16" type="text" value="" readonly>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                    </div>
+                    <input type="hidden" id="winter_date" value=""/><br/>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row jumbotron">
+        <div>
+            <div class="col-md-2 pull-right">
+                <select class="form-control">
+                    <option>All</option>
+                    <option>Fall</option>
+                    <option>Winter</option>
+                </select>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Fall Deadline</th>
+                    <th>Winter Deadline</th>
+                    <th>Percentage</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th>Weekly Project Log</th>
+                    <th>Jan 1, 2018</th>
+                    <th>May 1, 2018</th>
+                    <th>5%</th>
+                </tr>
+                <tr>
+                    <th>Complete Pre-Internship Details Form</th>
+                    <th>Jan 1, 2018</th>
+                    <th>May 1, 2018</th>
+                    <th>10%</th>
+                </tr>
+                <tr>
+                    <th>Complete Work Permit</th>
+                    <th>Jan 1, 2018</th>
+                    <th>May 1, 2018</th>
+                    <th>15%</th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+<script type="text/javascript" src="js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
+<script type="text/javascript">
+    $('.form_date').datetimepicker({
+        // language:  'fr',
+        weekStart: 1,
+        todayBtn: 1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        minView: 2,
+        forceParse: 0
+    });
+</script>
+</body>
+</html>
