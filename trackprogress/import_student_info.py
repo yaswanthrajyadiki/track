@@ -21,7 +21,7 @@ if django.VERSION >= (1, 7):  # Identify django version
 from tracking_system.models import Student, List, Process
 import xlrd  # excel read plugin
 
-data = xlrd.open_workbook(r'''C:\Users\kiran\Desktop\track\trackprogress''')  # Open File
+data = xlrd.open_workbook(r'''Studentinfo.xlsx''')  # Open File
 table = data.sheet_by_index(0)  # Fetch table
 nrows = table.nrows  # Row
 ncols = table.ncols  # Colomn
