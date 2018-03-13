@@ -7,8 +7,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from django.db.models import Q
+from datetime import datetime
+import operator
 
-from tracking_system.serializer import UserSerializer, ListSerializer, ProcessSerializer, ProcessSerializerForList, \
+from .serializer import UserSerializer, ListSerializer, ProcessSerializer, ProcessSerializerForList, \
     StudentSerializer
 from .models import List, Student, Process
 
@@ -79,6 +82,33 @@ class ListViewset(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
     serializer_class = ListSerializer
 
+    def list(self, request, *args, **kwargs):
+        task_name = request.GET.get('task_name', None)
+        q_list = []
+        if task_name:
+            q_list.append(Q(list_name=task_name))
+        due_date = request.GET.get('due_date', None)
+        if due_date:
+            try:
+                due_date = datetime.strptime(due_date, '%Y-%m-%d')
+                q_list.append(Q(Q(list__fall_due_date=due_date) | Q(list__winter_due_date=due_date)))
+            except Exception as e:
+                pass
+        sort_by = request.GET.get('sort_by', 'list_name')
+        order = request.GET.get('order', '')
+        if sort_by:
+            if len(q_list) > 0:
+                list = self.queryset.filter(reduce(operator.and_, q_list)).order_by(order + sort_by)
+            else:
+                list = self.queryset.all().order_by(order + sort_by)
+        else:
+            if len(q_list) > 0:
+                list = self.queryset.filter(reduce(operator.and_, q_list))
+            else:
+                list = self.queryset.all()
+        serializer = ListSerializer(list, many=True)
+        return Response(serializer.data)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -145,7 +175,38 @@ class ProcessViewset(viewsets.ModelViewSet):
 
     @list_route(methods=['get', 'post'], permission_classes=[IsAdminUser])
     def list_by_id(self, request):
-        list = self.queryset.filter(list__id=int(request.GET['id']))
+        student_name = request.GET.get('student_email', None)
+        q_list = []
+        if student_name:
+            q_list.append(Q(student__name__icontains=student_name))
+        due_date = request.GET.get('due_date', None)
+        if due_date:
+            try:
+                due_date = datetime.strptime(due_date, '%Y-%m-%d')
+                q_list.append(Q(Q(list__fall_due_date=due_date) | Q(list__winter_due_date=due_date)))
+            except Exception as e:
+                pass
+        list_name = request.GET.get('list_name', None)
+        if list_name:
+            q_list.append(Q(list__list_name=list_name))
+        task_status = request.GET.get('task_status', None)
+        if task_status:
+            q_list.append(Q(status=task_status))
+        _id = request.GET['id']
+        if _id:
+            q_list.append(Q(list__id=int(_id)))
+        sort_by = request.GET.get('sort_by', 'student__first_name')
+        order = request.GET.get('order', '')
+        if sort_by:
+            if len(q_list) > 0:
+                list = self.queryset.filter(reduce(operator.and_, q_list)).order_by(order + sort_by)
+            else:
+                list = self.queryset.all().order_by(order + sort_by)
+        else:
+            if len(q_list) > 0:
+                list = self.queryset.filter(reduce(operator.and_, q_list))
+            else:
+                list = self.queryset.all()
         serializer = ProcessSerializer(list, many=True)
         return Response(serializer.data)
 
