@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from django.db.models import Q
 from datetime import datetime
 import operator
+from functools import reduce
 
 from .serializer import UserSerializer, ListSerializer, ProcessSerializer, ProcessSerializerForList, \
     StudentSerializer
@@ -83,24 +84,23 @@ class ListViewset(viewsets.ModelViewSet):
     serializer_class = ListSerializer
 
     def list(self, request, *args, **kwargs):
-        task_name = request.GET.get('task_name', None)
+        list_name = request.GET.get('list_name', None)
         q_list = []
-        if task_name:
-            q_list.append(Q(list_name=task_name))
+        if list_name:
+            q_list.append(Q(list_name__icontains=list_name))
         due_date = request.GET.get('due_date', None)
         if due_date:
             try:
                 due_date = datetime.strptime(due_date, '%Y-%m-%d')
-                q_list.append(Q(Q(list__fall_due_date=due_date) | Q(list__winter_due_date=due_date)))
+                q_list.append(Q(Q(fall_due_date=due_date) | Q(winter_due_date=due_date)))
             except Exception as e:
                 pass
         sort_by = request.GET.get('sort_by', 'list_name')
-        order = request.GET.get('order', '')
         if sort_by:
             if len(q_list) > 0:
-                list = self.queryset.filter(reduce(operator.and_, q_list)).order_by(order + sort_by)
+                list = self.queryset.filter(reduce(operator.and_, q_list)).order_by(sort_by)
             else:
-                list = self.queryset.all().order_by(order + sort_by)
+                list = self.queryset.all().order_by(sort_by)
         else:
             if len(q_list) > 0:
                 list = self.queryset.filter(reduce(operator.and_, q_list))
@@ -173,12 +173,17 @@ class ProcessViewset(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProcessSerializer
 
-    @list_route(methods=['get', 'post'], permission_classes=[IsAdminUser])
-    def list_by_id(self, request):
-        student_name = request.GET.get('student_email', None)
+    def list(self, request):
         q_list = []
-        if student_name:
-            q_list.append(Q(student__name__icontains=student_name))
+        student_first_name = request.GET.get('student_first_name', None)
+        if student_first_name:
+            q_list.append(Q(student__first_name__icontains=student_first_name))
+        student_last_name = request.GET.get('student_last_name', None)
+        if student_last_name:
+            q_list.append(Q(student__last_name__icontains=student_last_name))
+        student_email = request.GET.get('student_email', None)
+        if student_email:
+            q_list.append(Q(student__email__icontains=student_email))
         due_date = request.GET.get('due_date', None)
         if due_date:
             try:
@@ -188,25 +193,37 @@ class ProcessViewset(viewsets.ModelViewSet):
                 pass
         list_name = request.GET.get('list_name', None)
         if list_name:
-            q_list.append(Q(list__list_name=list_name))
+            q_list.append(Q(list__list_name__icontains=list_name))
         task_status = request.GET.get('task_status', None)
         if task_status:
             q_list.append(Q(status=task_status))
-        _id = request.GET['id']
-        if _id:
-            q_list.append(Q(list__id=int(_id)))
-        sort_by = request.GET.get('sort_by', 'student__first_name')
-        order = request.GET.get('order', '')
+        sorts = {
+            "student_first_name": "student__first_name",
+            "student_last_name": "student__last_name",
+            "student_email": "student__email",
+            "student_group": "student__group",
+            "-student_first_name": "-student__first_name",
+            "-student_last_name": "-student__last_name",
+            "-student_email": "-student__email",
+            "-student_group": "-student__group"
+        }
+        sort_by = sorts.get(request.GET.get('sort_by', 'student_email'), "student__email")
         if sort_by:
             if len(q_list) > 0:
-                list = self.queryset.filter(reduce(operator.and_, q_list)).order_by(order + sort_by)
+                list = self.queryset.filter(reduce(operator.and_, q_list)).order_by(sort_by)
             else:
-                list = self.queryset.all().order_by(order + sort_by)
+                list = self.queryset.all().order_by(sort_by)
         else:
             if len(q_list) > 0:
                 list = self.queryset.filter(reduce(operator.and_, q_list))
             else:
                 list = self.queryset.all()
+        serializer = ProcessSerializer(list, many=True)
+        return Response(serializer.data)
+
+    @list_route(methods=['get', 'post'], permission_classes=[IsAdminUser])
+    def list_by_id(self, request):
+        list = self.queryset.filter(id=request.GET['id'])
         serializer = ProcessSerializer(list, many=True)
         return Response(serializer.data)
 
